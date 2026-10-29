@@ -1,0 +1,17 @@
+.git
+.agents
+.env
+.env.*
+!.env.example
+vendor
+node_modules
+public/build
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/app/firebase-credentials.json
+Dockerfile
+docker-compose*.yml
+DEPLOYMENT.md
+

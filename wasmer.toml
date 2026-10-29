@@ -1,0 +1,28 @@
+[dependencies]
+"php/php" = "=8.3.4"
+
+[fs]
+"/app/" = "."
+
+[[command]]
+name = "run"
+module = "php/php:php"
+runner = "wasi"
+[command.annotations.wasi]
+main-args = ["-t", "/app/public", "-S", "localhost:8080"]
+
+# These commands are invoked by Wasmer Jobs. They run once and exit, so they
+# remain reliable even when the HTTP instance is stopped while idle.
+[[command]]
+name = "send-daily-recap"
+module = "php/php:php"
+runner = "wasi"
+[command.annotations.wasi]
+main-args = ["/app/artisan", "sensor:send-daily-recap", "--no-interaction"]
+
+[[command]]
+name = "check-sensor-alerts"
+module = "php/php:php"
+runner = "wasi"
+[command.annotations.wasi]
+main-args = ["/app/artisan", "sensor:check-alerts", "--no-interaction"]

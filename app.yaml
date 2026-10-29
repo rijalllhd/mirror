@@ -1,0 +1,45 @@
+kind: wasmer.io/App.v0
+name: skarp-iot-dashboard
+package: .
+description: Dashboard monitoring sensor SKARP IoT
+
+env:
+  # The volume preserves the cooldown after a Wasmer Job exits, preventing
+  # repeated WhatsApp alerts while a condition remains extreme.
+  CACHE_STORE: file
+  CACHE_FILE_PATH: /data/cache
+  CACHE_FILE_LOCK_PATH: /data/cache
+  SESSION_DRIVER: cookie
+  QUEUE_CONNECTION: sync
+  LOG_CHANNEL: stderr
+  FIREBASE_CREDENTIALS: /data/firebase-credentials.json
+  EXCEL_TEMPORARY_PATH: /data/laravel-excel
+
+volumes:
+  - name: skarp-iot-state
+    mount: /data
+
+# PHP is synchronous; one request per instance avoids concurrent file-cache
+# writes while allowing Wasmer to start another instance if needed.
+scaling:
+  mode: single_concurrency
+
+jobs:
+  # 20:00 Asia/Jakarta = 13:00 UTC.
+  - name: send-daily-sensor-recap
+    trigger: '0 13 * * *'
+    action:
+      execute:
+        command: send-daily-recap
+        retries: 3
+        timeout: 2m
+
+  # Wasmer Jobs have a one-minute minimum interval. The command itself only
+  # sends when THI/amonia pass the configured extreme thresholds.
+  - name: check-extreme-sensor-alerts
+    trigger: '* * * * *'
+    action:
+      execute:
+        command: check-sensor-alerts
+        retries: 2
+        timeout: 2m
