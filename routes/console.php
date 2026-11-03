@@ -19,3 +19,9 @@ Schedule::command('sensor:check-alerts')
     ->timezone('Asia/Jakarta')
     ->name('wa-peringatan-sensor')
     ->withoutOverlapping();
+
+Schedule::command('sensor:generate-reading --scheduled')
+    ->everyMinute()
+    ->timezone('Asia/Jakarta')
+    ->name('sensor-projection-firebase')
+    ->withoutOverlapping();

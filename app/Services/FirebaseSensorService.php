@@ -17,6 +17,22 @@ class FirebaseSensorService
         return $this->database()->getReference($this->sensorPath().'/History')->getValue() ?? [];
     }
 
+    public function writeReading(array $reading, string $id): void
+    {
+        $history = [
+            'suhu' => $reading['Suhu'],
+            'kelembapan' => $reading['Kelembapan'],
+            'amonia_ppm' => $reading['Amonia_PPM'],
+            'thi' => $reading['THI'],
+            'timestamp' => $reading['timestamp'],
+        ];
+
+        $this->database()->getReference()->update([
+            $this->sensorPath().'/Realtime' => $reading,
+            $this->sensorPath().'/History/'.$id => $history,
+        ]);
+    }
+
     private function database(): Database
     {
         $credentialsPath = config('firebase_client.credentials');

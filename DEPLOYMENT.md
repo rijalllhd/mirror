@@ -68,3 +68,7 @@ Deploy. Saat container `app` pertama kali hidup, ia otomatis membuat symbolic li
 Wasmer Edge bukan runtime Docker Compose yang selalu menyala; instance HTTP dapat dihentikan saat idle. Karena itu, jangan mengandalkan container `scheduler` pada `docker-compose.yml` untuk deployment Wasmer. Gunakan konfigurasi root [wasmer.toml](wasmer.toml) dan [app.yaml](app.yaml), lalu deploy dengan `wasmer deploy`.
 
 `app.yaml` membuat Wasmer Jobs yang menjalankan command Artisan secara langsung: rekap setiap `13:00 UTC` (`20:00 WIB`) dan pemeriksaan alert setiap satu menit. Volume persisten `/data` menyimpan kredensial Firebase dan cache cooldown, sehingga alert tidak berulang setiap menit selama kondisi ekstrem masih berlangsung. Tambahkan secret aplikasi melalui dashboard/CLI Wasmer—minimal `APP_KEY`, seluruh `FIREBASE_*`, `FONNTE_TOKEN`, `WA_TARGET_NUMBER`, dan `FIREBASE_CREDENTIALS_BASE64`—kemudian redeploy. Jangan menyimpan secret pada `app.yaml`.
+
+Job `generate-sensor-reading` memeriksa setiap menit apakah sudah lewat jeda acak 29–36 menit. Saat waktunya tiba, job menulis pembacaan yang sama dengan nilai dashboard ke `SKARP/Realtime` dan `SKARP/History`. Dashboard mengambil pembacaan dari cache bersama setiap 10 detik; Docker menggunakan volume `laravel_storage`, sedangkan Wasmer menggunakan `/data`.
+
+Untuk memasukkan satu pembacaan secara manual dari root project, jalankan `php artisan sensor:generate-reading`. Command ini memperbarui `SKARP/Realtime` dan menambahkan satu entri ke `SKARP/History`; jika gagal, pesan penyebabnya tampil di terminal.

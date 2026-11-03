@@ -25,16 +25,6 @@ class DashboardController extends Controller
 
     private function dashboardData(HistoryViewDataService $historyView)
     {
-        $firebaseConfig = [
-            'apiKey'            => config('firebase_client.api_key'),
-            'authDomain'        => config('firebase_client.auth_domain'),
-            'databaseURL'       => config('firebase_client.database_url'),
-            'projectId'         => config('firebase_client.project_id'),
-            'storageBucket'     => config('firebase_client.storage_bucket'),
-            'messagingSenderId' => config('firebase_client.messaging_sender_id'),
-            'appId'             => config('firebase_client.app_id'),
-        ];
-
         $sensorPath = config('firebase_client.sensor_path');
         
         // Fetch data from Firebase Admin SDK
@@ -79,7 +69,7 @@ class DashboardController extends Controller
             $monthlyHistory = [];
         }
 
-        return compact('firebaseConfig', 'sensorPath', 'realtimeData', 'monthlyHistory', 'historyChartData');
+        return compact('sensorPath', 'realtimeData', 'monthlyHistory', 'historyChartData');
     }
 
     /**

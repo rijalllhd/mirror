@@ -43,3 +43,11 @@ jobs:
         command: check-sensor-alerts
         retries: 2
         timeout: 2m
+
+  - name: generate-sensor-reading
+    trigger: '* * * * *'
+    action:
+      execute:
+        command: generate-sensor-reading
+        retries: 2
+        timeout: 2m

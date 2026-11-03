@@ -26,3 +26,10 @@ module = "php/php:php"
 runner = "wasi"
 [command.annotations.wasi]
 main-args = ["/app/artisan", "sensor:check-alerts", "--no-interaction"]
+
+[[command]]
+name = "generate-sensor-reading"
+module = "php/php:php"
+runner = "wasi"
+[command.annotations.wasi]
+main-args = ["/app/artisan", "sensor:generate-reading", "--scheduled", "--no-interaction"]

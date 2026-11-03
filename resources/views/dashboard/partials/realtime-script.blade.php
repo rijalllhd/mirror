@@ -1,6 +1,4 @@
 <script>
-const FIREBASE_CONFIG = @json($firebaseConfig);
-const SENSOR_PATH = @json($sensorPath);
 const MAX_HISTORY = 30;
 let fallbackReadings = 0;
 let charts = { Suhu: null, Kelembapan: null, Amonia_PPM: null, THI: null };
@@ -131,13 +129,7 @@ function pushChart(key, label, value) {
     chart.update('none');
 }
 
-firebase.initializeApp(FIREBASE_CONFIG);
-const db = firebase.database();
-
-db.ref(SENSOR_PATH + '/Realtime').on('value', (snap) => {
-    const d = snap.val();
-    if (!d) return;
-
+function renderReading(d, isNewReading) {
     const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     setText('val-suhu', numberText(d.Suhu, 1));
@@ -161,12 +153,13 @@ db.ref(SENSOR_PATH + '/Realtime').on('value', (snap) => {
     setBadge('amonia', getAmoniaStatus(Number(d.Amonia_PPM)));
     setBadge('thi', getThiStatus(Number(d.THI)));
 
-    pushChart('Suhu', now, Number(d.Suhu));
-    pushChart('Kelembapan', now, Number(d.Kelembapan));
-    pushChart('Amonia_PPM', now, Number(d.Amonia_PPM));
-    pushChart('THI', now, Number(d.THI));
-
-    fallbackReadings = Math.min(fallbackReadings + 1, MAX_HISTORY);
+    if (isNewReading) {
+        pushChart('Suhu', now, Number(d.Suhu));
+        pushChart('Kelembapan', now, Number(d.Kelembapan));
+        pushChart('Amonia_PPM', now, Number(d.Amonia_PPM));
+        pushChart('THI', now, Number(d.THI));
+        fallbackReadings = Math.min(fallbackReadings + 1, MAX_HISTORY);
+    }
     const count = charts.Suhu ? charts.Suhu.data.labels.length : fallbackReadings;
     setText('data-count', `${count} readings`);
 
@@ -175,10 +168,26 @@ db.ref(SENSOR_PATH + '/Realtime').on('value', (snap) => {
     const connDot = el('conn-dot');
     if (connDot) connDot.classList.add('animate-pulse');
     setText('conn-text', 'Live');
-}, (err) => {
-    console.error('Firebase error:', err);
-    const connBadge = el('conn-badge');
-    if (connBadge) connBadge.className = badgeClass('danger');
-    setText('conn-text', 'Gagal terhubung');
-});
+}
+
+let lastReadingTimestamp = null;
+
+async function updateDashboard() {
+    try {
+        const response = await fetch(@json(route('dashboard.reading')), { headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const reading = await response.json();
+        const isNewReading = reading.timestamp !== lastReadingTimestamp;
+        renderReading(reading, isNewReading);
+        lastReadingTimestamp = reading.timestamp;
+    } catch (error) {
+        console.error('Dashboard reading error:', error);
+        const connBadge = el('conn-badge');
+        if (connBadge) connBadge.className = badgeClass('danger');
+        setText('conn-text', 'Koneksi terputus');
+    }
+}
+
+updateDashboard();
+window.setInterval(updateDashboard, 10000);
 </script>

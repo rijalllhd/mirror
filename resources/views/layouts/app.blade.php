@@ -25,10 +25,6 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Firebase JS SDK v10 (modular via CDN compat) -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-
     @stack('styles')
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-950 antialiased">
